@@ -1,6 +1,7 @@
 import falcon, json
 
-from database import pool, PoolMiddleware
+from database import PoolMiddleware, query
+
 
 class StorageError:
     @staticmethod
@@ -21,13 +22,13 @@ class UserResource:
         print(req.get_param('id', False))
         print(req.params)
 
-        with pool.connection() as conn:
-          records = conn.execute("select name from users limit 1000").fetchall()
+        db = query()
+        records = db.execute("select name from users limit 10000").fetchall()
 
         resp.media = records
     
     def on_post(self, req, resp):
-        db = req.context.db
+        db = query()
         try:
             data = req.media
             query = """
