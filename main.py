@@ -1,7 +1,6 @@
 import falcon, json
 
-from database import PoolMiddleware, query
-
+from database import db
 
 class StorageError:
     @staticmethod
@@ -22,13 +21,11 @@ class UserResource:
         print(req.get_param('id', False))
         print(req.params)
 
-        db = query()
-        records = db.execute("select name from users limit 10000").fetchall()
+        records = db.execute("select name from users limit 100").fetchall()
 
         resp.media = records
     
     def on_post(self, req, resp):
-        db = query()
         try:
             data = req.media
             query = """
@@ -58,7 +55,7 @@ class SuffixResource:
 	def on_get_list(self, req, resp):
 		resp.text = 'list'
 
-app = falcon.App(middleware=[PoolMiddleware(), AuthMiddleware()])
+app = falcon.App(middleware=[AuthMiddleware()])
 
 app.add_route('/users', UserResource())
 
