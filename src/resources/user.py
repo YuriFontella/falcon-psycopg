@@ -2,6 +2,7 @@ import falcon
 
 from src.hooks.secure import secure
 from config.database import db
+from src.storage.limits import limiter
 
 @falcon.before(secure)
 class User:
@@ -18,6 +19,7 @@ class User:
             resp.media = records
 
 
+    @falcon.before(limiter)
     async def on_post(self, req, resp):
         try:
             data = await req.media

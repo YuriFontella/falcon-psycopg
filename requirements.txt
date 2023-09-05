@@ -1,3 +1,4 @@
 falcon
+falcon-limiter
 uvicorn
 psycopg[binary]
