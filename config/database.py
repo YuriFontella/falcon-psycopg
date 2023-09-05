@@ -15,4 +15,4 @@ def row_factory(cursor):
 
     return make_row
 
-db = psycopg.connect(config.get(env, 'CONNINFO'), row_factory=row_factory)
+db = psycopg.connect(config.get(env, 'CONNINFO'), autocommit=True, row_factory=row_factory)
