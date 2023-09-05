@@ -19,7 +19,7 @@ class User:
             resp.media = records
 
 
-    @falcon.before(limiter)
+    @limiter.limit()
     async def on_post(self, req, resp):
         try:
             data = await req.media
