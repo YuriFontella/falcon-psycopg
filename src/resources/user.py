@@ -1,28 +1,35 @@
 import falcon
 
 from src.hooks.secure import secure
-from config.database import db
 from src.storage.limits import limiter
 
 @falcon.before(secure)
 class User:
     async def on_get(self, req, resp):
         try:
+            pool = req.context.pool
+
             print(req.get_param('id', False))
             print(req.params)
 
-            records = db.execute("select name from users limit 1").fetchone()
+            async with pool.connection() as conn:
+                cur = await conn.execute("select name from users limit 1")
+                records = await cur.fetchall()
+
+            print(records)
             
-        except Exception:
-            raise falcon.HTTPBadRequest()
+        except Exception as e:
+            raise falcon.HTTPBadRequest(description=str(e))
 
         else:
-            resp.media = records
+            resp.media = True
 
 
     @limiter.limit()
     async def on_post(self, req, resp):
         try:
+            pool = req.context.pool
+
             data = await req.media
             query = """
               insert into users (name, group_id)
@@ -34,9 +41,8 @@ class User:
               returning id
             """
 
-            with db.transaction():
-                record = db.execute(query, data).fetchone()
-                print(record)
+            async with pool.connection() as conn:
+                await conn.execute(query, data)
 
         except Exception as e:
             print(e)

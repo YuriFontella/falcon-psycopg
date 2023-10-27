@@ -1,4 +1,4 @@
 falcon
 falcon-limiter
 uvicorn
-psycopg[binary]
+psycopg[binary, pool]

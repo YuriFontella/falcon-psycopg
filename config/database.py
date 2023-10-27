@@ -1,4 +1,7 @@
-import psycopg, configparser, os
+import configparser
+import os
+
+from psycopg_pool import AsyncConnectionPool
 
 config = configparser.ConfigParser()
 
@@ -23,12 +26,16 @@ def row_factory(cursor):
 
 conninfo = config.get(env, 'CONNINFO')
 
-db = psycopg.connect(
-    conninfo=conninfo,
-    autocommit=True,
-    row_factory=row_factory,
-    keepalives=1,
-    keepalives_idle=300,
-    keepalives_interval=60,
-    keepalives_count=5
-)
+class Pool:
+    def __init__(self):
+        self.pool = None
+
+    async def process_startup(self, scope, event):
+        self.pool = AsyncConnectionPool(conninfo=conninfo, min_size=2, max_size=4)
+
+    async def process_shutdown(self, scope, event):
+        if self.pool:
+            await self.pool.close()
+
+    async def process_request(self, req, resp):
+        req.context.pool = self.pool
