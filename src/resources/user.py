@@ -11,7 +11,7 @@ class User:
             print(req.get_param('id', False))
             print(req.params)
 
-            records = db.execute("select name from users limit 1").fetchall()
+            records = db.execute("select name from users limit 1").fetchone()
             
         except Exception:
             raise falcon.HTTPBadRequest()
